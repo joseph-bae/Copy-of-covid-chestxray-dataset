@@ -24,7 +24,7 @@ COVIDMaleImages={};
 
 for i=1:length(COVIDMaleImageNames)
     
-    COVIDMaleImages{i}=im2double(imread(MalePath+"\"+COVIDMaleImageNames(i)));
+    COVIDMaleImages{i}=(imread(MalePath+"\"+COVIDMaleImageNames(i)));
     
 end
 
@@ -44,49 +44,71 @@ COVIDFemaleImages={};
 
 for i=1:length(COVIDFemaleImageNames)
     
-    COVIDFemaleImages{i}=im2double(imread(FemalePath+"\"+COVIDFemaleImageNames(i)));
+    COVIDFemaleImages{i}=(imread(FemalePath+"\"+COVIDFemaleImageNames(i)));
     
 end
 
 
 
 
-for i=1:5
-
-    I=rgb2gray(COVIDMaleImages{i}); %only if 3 channels
+for i=6:6
+    I=COVIDMaleImages{i};
+    if numel(size(COVIDMaleImages{i}))>=3
+        I=(rgb2gray(I)); %only if 3 channels
+    end
+    I=histeq(I);
     
-    %%
-    a_thresh = I >= .5; % change threshold as needed
+    
+    %{
+    mask=EulerMinMax(I,255);
+    mask=~mask;
+    mask = bwareafilt(mask,2);
+    
+    
+    figure
+    imshow(I, []);
+    showMaskAsOverlay(0.5,mask,'g');
+    blocations = bwboundaries(mask,'noholes');
+    for ind = 1:numel(blocations)
+        % Convert to x,y order.
+        pos = blocations{ind};
+    pos = fliplr(pos);
+        % Create a freehand ROI.
+        drawfreehand('Position', pos);
+    end
+    %}
+    %{
+    a_thresh = I >=150;   %.6*max(COVIDMaleImages{i},[],'all'); % change threshold as needed;
     [labelImage, numberOfBlobs] = bwlabel(a_thresh);
     props = regionprops(a_thresh,'all');
     sortedSolidity = sort([props.Solidity], 'descend');
     SB = sortedSolidity(1);
     if SB == 1 % SB only accept solidity == 1 filter out bones
-        binaryImage = imbinarize(I);
+        binaryImage = imbinarize(I); 
         SE = strel('square',3);
         morphologicalGradient = imsubtract(imdilate(binaryImage, SE),imerode(binaryImage, SE));
         mask = imbinarize(morphologicalGradient,0.03);
-        SE = strel('square',2);
+        SE = strel('disk',20);
         mask = imclose(mask, SE);
         mask = imfill(mask,'holes');
         mask = bwareafilt(mask,2); % control number of area show
         notMask = ~mask;
         mask = mask | bwpropfilt(notMask,'Area',[-Inf, 5000 - eps(5000)]);
+        blocations = bwboundaries(mask,'noholes');
         figure
-        imshow(I);
-        showMaskAsOverlay(0.5,mask,'g'); 
+        imshow(I, []);
+        showMaskAsOverlay(0.5,mask,'g');
         %{
-        BW2 = imfill(binaryImage,'holes');
-        new_image = BW2 ;
-        new_image(~mask) = 0; % invert background and holes
-        B=bwboundaries(new_image); % can only accept 2 dimensions
-        subplot(2,2,4)
-        imshow(new_image);
-        hold on
-        visboundaries(B);
-%}
+        for ind = 1:numel(blocations)
+            % Convert to x,y order.
+            pos = blocations{ind};
+        pos = fliplr(pos);
+            % Create a freehand ROI.
+            drawfreehand('Position', pos);
+        end
+        %}
     end
-
-
-
+        
+%}
+    
 end
