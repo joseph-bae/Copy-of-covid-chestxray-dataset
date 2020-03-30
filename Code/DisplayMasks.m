@@ -14,6 +14,7 @@ MasksMaleNames=strings;
 COVIDMaleImageNames=strings;
 j=1;
 %check for empty files and add file names to a string array
+
 for i=1:length(COVIDMaleFiles)
   
     if COVIDMaleFiles(i).bytes ~= 0
@@ -53,8 +54,10 @@ for i=1:length(COVIDFemaleFiles)
     end
     
 end
+%{
 COVIDFemaleImages={};
 MaskFemaleImages={};
+
 for i=1:length(COVIDFemaleImageNames)
     
     COVIDFemaleImages{i}=(imread(RawFemalePath+"\"+COVIDFemaleImageNames(i)));
@@ -65,4 +68,4 @@ for i=1:length(COVIDFemaleImageNames)
     saveas(gcf,FemalePath+"\Overlays\"+MasksFemaleNames(i)+".png")
     
 end
-
+%}
