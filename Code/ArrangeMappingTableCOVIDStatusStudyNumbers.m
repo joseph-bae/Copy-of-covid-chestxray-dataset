@@ -72,3 +72,4 @@ NewMappingTable=[NewMappingTable RepeatStringTable];
 StudyTypeTable=table(StudyTypeArray,'VariableNames',"Study_Types");
 NewMappingTable=[NewMappingTable StudyTypeTable];
 NewMappingTable=movevars(NewMappingTable,'Study_Types','After','COVID_Status');
+%%writetable(NewMappingTable,"C:\Users\josep\Desktop\Research\Prasanna\COVID\Results\MappingTables\MappingTest4212020.csv");
